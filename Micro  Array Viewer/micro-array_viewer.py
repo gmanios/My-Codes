@@ -59,7 +59,7 @@ def Run():
        x= np.array(df.columns),
        y= np.array(df.index),xgap=2,ygap=64,colorscale='RdYlGn'))
     fig['layout']['yaxis']['autorange'] = "reversed"
-
+    fig['layout'].update(width=2000, height=2000, autosize=False)
 
     fig.update_xaxes(side="top")
     fig.update_layout(paper_bgcolor="#2a2e2c",font_color="white",template="plotly_dark",title='Results from file   '+name)
