@@ -57,11 +57,12 @@ def Run():
     fig = go.Figure(data=go.Heatmap(
        z=df,
        x= np.array(df.columns),
-       y= np.array(df.index),xgap=2,ygap=64,colorscale='RdYlGn'))
+       y= np.array(df.index),xgap=2,ygap=32,colorscale='RdYlGn'))
     fig['layout']['yaxis']['autorange'] = "reversed"
     fig['layout'].update(width=2000, height=2000, autosize=False)
 
-    fig.update_xaxes(side="top")
+
+    fig.update_xaxes(side="top" )
     fig.update_layout(paper_bgcolor="#2a2e2c",font_color="white",template="plotly_dark",title='Results from file   '+name)
     fig.show()
     import seaborn as sns
@@ -128,6 +129,44 @@ def Run2():
                            legendanchor=(1.46, 1))
 
 
+def Run3():
+    filename = Import_File()
+
+    for f1 in filename:
+        from pyvis.network import Network
+        import pandas as pd
+
+        net = Network(height="1000px", width="100%", bgcolor="#222222", font_color="white")
+
+        # set the physics layout of the network
+        net.barnes_hut()
+        data = pd.read_csv(f1,sep='\t')
+
+        sources = data['Source']
+        targets = data['Target']
+        weights = data['Weight']
+
+        edge_data = zip(sources, targets, weights)
+
+        for e in edge_data:
+            src = e[0]
+            dst = e[1]
+            w = e[2]
+
+            net.add_node(src, src, title=src)
+            net.add_node(dst, dst, title=dst)
+            net.add_edge(src, dst, value=w)
+
+        neighbor_map = net.get_adj_list()
+
+        # add neighbor data to node hover data
+        for node in net.nodes:
+            node["title"] += " Neighbors:<br>" + "<br>".join(neighbor_map[node["id"]])
+            node["value"] = len(neighbor_map[node["id"]])
+
+        net.show("Network_data.html")
+
+
 
 def Import_File(event=None):
     file_list=[]
@@ -146,25 +185,27 @@ def Import_File(event=None):
 def gui():
     # GUI
     root = tk.Tk()
-    root.geometry("300x250")
+    root.geometry("380x300")
 
     root.title("Simple micro - array Viewer tool  @ 2020 G.Manios")
 
     photo = PhotoImage(file=r"ma.png")
     photo2 = PhotoImage(file=r"small_v.png")
+    photo3 = PhotoImage(file=r"net_work.png")
 
     photoimage2 = photo.subsample(1, 1)
     photoimage3 = photo2.subsample(1, 1)
+    photoimage4 = photo3.subsample(1, 1)
 
-
-    button1 = tk.Button(root, height=100, width=360, text='Select micro-array data and view them ! ', command=Run,
+    button1 = tk.Button(root, height=100, width=385, text=' Select micro-array data and view them ! ', command=Run,
                         image=photoimage2,
                         compound=LEFT).pack(side=TOP)
-    button2 = tk.Button(root, height=100, width=360, text='Insert data for volcano plot', command=Run2,
+    button2 = tk.Button(root, height=100, width=385, text=' Insert data for volcano plot', command=Run2,
                         image=photoimage3,
-                        compound=LEFT).pack(side=BOTTOM)
-    label2 = tk.Label(text="Click this button !")
-    label2.pack()
+
+                        compound=LEFT).pack(side=TOP)
+    button3 = tk.Button(root, height=100, width=385, text=' Insert network data', command=Run3,
+                        image=photoimage4, compound=LEFT).pack(side=TOP)
 
 
 
